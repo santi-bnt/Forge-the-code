@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/runtimes/pyodide/
+tsconfig.tsbuildinfo
+*.log
+.DS_Store
+.serena/
