@@ -3,7 +3,7 @@ import { RefreshCw, X } from 'lucide-react';
 import type { Progress } from '../types';
 import { saveProgress } from '../storage/db';
 
-export function PwaUpdatePrompt({ progress }: { progress: Progress }) {
+export function PwaUpdatePrompt({ progress, userId }: { progress: Progress; userId?: string }) {
   const [registration,setRegistration]=useState<ServiceWorkerRegistration|null>(null);
   const [available,setAvailable]=useState(false);
   const [updating,setUpdating]=useState(false);
@@ -32,7 +32,7 @@ export function PwaUpdatePrompt({ progress }: { progress: Progress }) {
   async function apply(){
     if(!registration?.waiting)return;
     setUpdating(true);setError('');
-    try{await saveProgress(progress);registration.waiting.postMessage({type:'SKIP_WAITING'});}
+    try{await saveProgress(progress,userId);registration.waiting.postMessage({type:'SKIP_WAITING'});}
     catch(reason){setUpdating(false);setError(reason instanceof Error?reason.message:'Progress could not be saved.');}
   }
   if(!available)return null;

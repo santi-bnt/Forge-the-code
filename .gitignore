@@ -5,3 +5,5 @@ tsconfig.tsbuildinfo
 *.log
 .DS_Store
 .serena/
+.env*
+!.env.example

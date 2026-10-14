@@ -99,3 +99,15 @@ scripts/
 - Las pruebas automatizadas no sustituyen la checklist en modo avión ni la QA en tamaños físicos de iPhone/iPad; las pestañas Learn/Code/Output se usan en pantallas estrechas y las columnas se apilan en pantallas angostas.
 
 La ejecución local se diseñó para ejercicios educativos personales. No debe usarse como sandbox de servidor ni para código hostil con información sensible en el mismo origen.
+# Accounts and cloud progress
+
+Authentication uses Supabase Auth. Local course data remains in the existing IndexedDB database (`codebook`); account data is stored under an Auth UUID namespace, while the original anonymous `progress` record remains available for an explicit one-time claim or fresh-start choice.
+
+## Supabase setup
+
+1. In the Forge-the-code Supabase project, apply `supabase/migrations/20261009000000_user_sync.sql`. With the CLI, run `supabase login`, `supabase link --project-ref <project-ref>`, then `supabase db push`; or run the versioned migration in the SQL editor.
+2. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project API settings. Never use a service role key in Vite variables.
+3. Configure the Supabase Auth site URL and redirect URLs for local development and the deployed Vercel origin. Enable email/password sign-in and choose the email confirmation policy.
+4. Add the same two public Vite variables to the Vercel project's Environment Variables, then redeploy. No Supabase project URL or key is hardcoded in the app.
+
+Cloud sync currently stores user-owned lesson progress, exercise progress, drafts, notes, bookmarks and learning settings. Course content and code execution remain local. If cloud sync is unavailable, the local user namespace remains writable and the queue retries on reconnection.

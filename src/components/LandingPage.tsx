@@ -1,9 +1,9 @@
 import { ArrowRight, Braces, Check, Code2, Cpu, Layers3, WifiOff } from 'lucide-react';
 import type { TrackId } from '../types';
 
-export function LandingPage({ onStart }: { onStart: (track?: TrackId) => void }) {
+export function LandingPage({ onStart, onLogin }: { onStart: (track?: TrackId) => void; onLogin: () => void }) {
   return <div className="landing-page">
-    <header className="landing-header"><button className="landing-brand" onClick={() => onStart()}><span><Braces size={20}/></span><strong>FORGE THE CODE</strong></button><nav aria-label="Main navigation"><a href="#curriculum">Curriculum</a><a href="#offline">Offline learning</a><button className="button secondary" onClick={() => onStart()}>Open app <ArrowRight size={16}/></button></nav></header>
+    <header className="landing-header"><button className="landing-brand" onClick={() => onStart()}><span><Braces size={20}/></span><strong>FORGE THE CODE</strong></button><nav aria-label="Main navigation"><a href="#curriculum">Curriculum</a><a href="#offline">Offline learning</a><button className="button secondary" onClick={onLogin}>Log in</button><button className="button primary" onClick={() => onStart()}>Create account <ArrowRight size={16}/></button></nav></header>
     <main>
       <section className="landing-hero">
         <div className="landing-copy"><span className="eyebrow">AN INTERACTIVE PROGRAMMING BOOK</span><h1>Forge the Code</h1><p className="landing-tagline">Master code by building it.</p><p className="landing-lead">Learn algorithms, Python, C, C++ and embedded systems through clear lessons, real code and hands-on visual labs.</p><div className="landing-actions"><button className="button primary" onClick={() => onStart()}><Code2 size={17}/>Start learning</button><button className="button secondary" onClick={() => onStart('algorithms')}>Explore curriculum <ArrowRight size={16}/></button></div><div className="landing-proof"><span><Check size={15}/> Runs locally</span><span><WifiOff size={15}/> Works offline after setup</span></div></div>
@@ -14,6 +14,6 @@ export function LandingPage({ onStart }: { onStart: (track?: TrackId) => void })
       <section id="offline" className="landing-offline"><div><WifiOff size={22}/><span className="eyebrow">DESIGNED FOR OFFLINE LEARNING</span></div><h2>Your downloaded lessons and runtimes stay on this device.</h2><p>Prepare Forge for offline use once. Then keep reading, coding and practicing without a connection.</p><button className="button secondary" onClick={() => onStart()}>See offline settings <ArrowRight size={16}/></button></section>
       <section className="landing-final"><div><span className="eyebrow">START WITH A SMALL STEP</span><h2>Make the next idea click.</h2></div><button className="button primary" onClick={() => onStart()}>Start learning <ArrowRight size={16}/></button></section>
     </main>
-    <footer className="landing-footer"><span>FORGE THE CODE</span><span>Master code by building it.</span><small>No account required. Progress stays on this device.</small></footer>
+    <footer className="landing-footer"><span>FORGE THE CODE</span><span>Master code by building it.</span><small>Create an account to keep your progress in sync across devices. Offline learning stays available.</small></footer>
   </div>;
 }
