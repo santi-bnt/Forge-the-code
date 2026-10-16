@@ -110,4 +110,13 @@ Authentication uses Supabase Auth. Local course data remains in the existing Ind
 3. Configure the Supabase Auth site URL and redirect URLs for local development and the deployed Vercel origin. Enable email/password sign-in and choose the email confirmation policy.
 4. Add the same two public Vite variables to the Vercel project's Environment Variables, then redeploy. No Supabase project URL or key is hardcoded in the app.
 
+### Production Auth and email
+
+- In **Authentication → URL Configuration**, set the Site URL to `https://forge-the-code.vercel.app` and allow `https://forge-the-code.vercel.app/**`, `http://localhost:5173/**`, and any exact Vercel preview origins used by the team. Keep the allowlist narrow; confirmation links return to `/auth/callback` and recovery links return to `/reset-password`.
+- In Vercel, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` for Production (and Preview only if preview builds should connect to the project). Redeploy after changing variables.
+- Supabase's built-in email sender is suitable for development and limited testing. Before public production use, configure a transactional SMTP provider in Supabase Auth, verify the sending domain, and customize confirmation and recovery templates. SMTP credentials belong only in Supabase settings, never in Vite variables.
+- Supabase redirect allowlists and email delivery settings are project-level configuration and must be verified in the Supabase dashboard. Turnstile is not enabled yet; the auth form is the integration point if abuse controls are needed.
+
+Vercel serves all SPA routes through `index.html` and adds baseline browser security headers. Authenticated API responses are not handled by the Service Worker; it only caches same-origin static app resources. The application does not define a Content Security Policy yet because the local WASM/worker execution requirements need deployment-level validation before enforcing one.
+
 Cloud sync currently stores user-owned lesson progress, exercise progress, drafts, notes, bookmarks and learning settings. Course content and code execution remain local. If cloud sync is unavailable, the local user namespace remains writable and the queue retries on reconnection.

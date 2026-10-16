@@ -6,6 +6,7 @@ type AuthContextValue = {
   user: User | null; session: Session | null; isLoading: boolean; isAuthenticated: boolean; isOffline: boolean; configured: boolean;
   signIn(email: string, password: string): Promise<void>;
   signUp(email: string, password: string, name: string): Promise<boolean>;
+  resendConfirmation(email: string): Promise<void>;
   signOut(): Promise<void>;
   resetPassword(email: string): Promise<void>;
   updatePassword(password: string): Promise<void>;
@@ -28,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     user: session?.user ?? null, session, isLoading, isAuthenticated: Boolean(session?.user), isOffline, configured: supabaseConfigured,
     async signIn(email, password) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; },
-    async signUp(email, password, name) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: name } } }); if (error) throw error; return Boolean(data.session); },
+    async signUp(email, password, name) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: name }, emailRedirectTo: `${location.origin}/auth/callback` } }); if (error) throw error; return Boolean(data.session); },
+    async resendConfirmation(email) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${location.origin}/auth/callback` } }); if (error) throw error; },
     async signOut() { if (!supabase) { setSession(null); return; } const { error } = await supabase.auth.signOut({ scope: navigator.onLine ? 'global' : 'local' }); if (error) throw error; setSession(null); },
     async resetPassword(email) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/reset-password` }); if (error) throw error; },
     async updatePassword(password) { if (!supabase) throw new Error('Configura Supabase para habilitar cuentas.'); const { error } = await supabase.auth.updateUser({ password }); if (error) throw error; },
