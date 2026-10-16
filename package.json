@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build && node scripts/offline-manifest.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run --configLoader runner"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.0",

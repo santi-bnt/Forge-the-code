@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { claimLegacyProgress, clearSyncQueueEntry, emptyProgress, getLegacyMigrationStatus, getProgress, getSyncQueue, markLegacyIgnored, mergeProgress, parseBackup, saveProgress, makeBackup } from './db';
 
 describe('local progress and backup',()=>{
-  beforeEach(async()=>saveProgress(emptyProgress));
+  beforeEach(async()=>{await new Promise<void>((resolve,reject)=>{const request=indexedDB.deleteDatabase('codebook');request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);request.onblocked=()=>reject(new Error('IndexedDB reset was blocked'));});await saveProgress(emptyProgress);});
   it('round trips progress through IndexedDB and normalizes old attempt counters',async()=>{
     await saveProgress({...emptyProgress,completedLessons:['arrays'],attempts:{'array-sum':{...emptyProgress.attempts['array-sum'],runs:3}}});
     expect((await getProgress()).completedLessons).toEqual(['arrays']);
@@ -30,12 +30,17 @@ describe('local progress and backup',()=>{
     expect(await getLegacyMigrationStatus('user-a')).toBe('pending');
     const claimed=await claimLegacyProgress('user-a');
     expect(claimed.completedLessons).toContain('legacy-array');
+    expect(await getSyncQueue('user-a')).toHaveLength(1);
     await saveProgress({...emptyProgress,completedLessons:['user-b-lesson']},'user-b');
     expect((await getProgress('user-b')).completedLessons).toEqual(['user-b-lesson']);
     expect((await getProgress('user-a')).completedLessons).toContain('legacy-array');
     expect((await getProgress()).completedLessons).toContain('legacy-array');
     await claimLegacyProgress('user-a');
     expect((await getProgress('user-a')).notes.legacy).toBe('old note');
+    expect(await getSyncQueue('user-a')).toHaveLength(1);
+    expect(await getLegacyMigrationStatus('user-a')).toBe('claimed');
+    expect(await getLegacyMigrationStatus('user-b')).toBe('none');
+    await expect(claimLegacyProgress('user-b')).rejects.toThrow('already been claimed');
   });
   it('keeps declined legacy progress recoverable and records the choice per account',async()=>{
     await saveProgress({...emptyProgress,bookmarks:['arrays']});
