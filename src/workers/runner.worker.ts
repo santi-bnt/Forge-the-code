@@ -2,6 +2,7 @@
 import { loadPyodide } from 'pyodide';
 import { buildNativeSource, pythonTestScript } from '../runner/harness';
 import { compileAndRunNative } from '../runner/native';
+import { compareCases, interviewScript, type PythonCase } from '../interview/evaluator';
 import type { RunnerRequest, RunnerResponse } from '../runner';
 import type { RunResult, TestCase, TestResult } from '../types';
 
@@ -32,7 +33,26 @@ async function runPython(request: Extract<RunnerRequest, { kind: 'exercise' }>):
   }
 }
 
-async function runNative(request: RunnerRequest): Promise<RunnerResponse> {
+async function runInterview(request: Extract<RunnerRequest, { kind: 'interview' }>): Promise<RunResult> {
+  status('Loading Python runtime…');
+  const pyodide = await loadPyodide({ indexURL: new URL('/runtimes/pyodide/', self.location.origin).href });
+  let stdout = '';
+  const limit = 4096;
+  pyodide.setStdout({ batched: line => {
+    if (stdout.length < limit) stdout += (line + '\n').slice(0, limit - stdout.length);
+  } });
+  status('Running tests…');
+  const started = performance.now();
+  try {
+    const raw = await pyodide.runPythonAsync(interviewScript(request.code, request.tests));
+    const values = JSON.parse(raw as string) as PythonCase[];
+    return { results: compareCases(request.tests, values), stdout, durationMs: Math.round(performance.now() - started) };
+  } catch (error) {
+    return { results: [], stdout, error: String(error).slice(-3000), durationMs: Math.round(performance.now() - started) };
+  }
+}
+
+async function runNative(request: Exclude<RunnerRequest, { kind: 'interview' }>): Promise<RunnerResponse> {
   const started = performance.now();
   const embedded = request.kind === 'embedded';
   const language = embedded ? 'c' : request.language as 'c' | 'cpp';
@@ -48,7 +68,8 @@ async function runNative(request: RunnerRequest): Promise<RunnerResponse> {
 self.onmessage = async event => {
   const request = event.data as RunnerRequest;
   try {
-    if (request.kind === 'exercise' && request.language === 'python') send({ result: await runPython(request) });
+    if (request.kind === 'interview') send({ result: await runInterview(request) });
+    else if (request.kind === 'exercise' && request.language === 'python') send({ result: await runPython(request) });
     else send(await runNative(request));
   } catch (error) { send({ error: error instanceof Error ? `${error.name}: ${error.message}\n${error.stack ?? ''}`.trim() : String(error) }); }
 };

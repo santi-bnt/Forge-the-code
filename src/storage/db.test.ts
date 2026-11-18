@@ -1,8 +1,19 @@
 import 'fake-indexeddb/auto';
+import { createMock, emptyInterview } from '../interview/progress';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { claimLegacyProgress, clearSyncQueueEntry, emptyProgress, getLegacyMigrationStatus, getProgress, getSyncQueue, markLegacyIgnored, mergeProgress, parseBackup, saveProgress, makeBackup } from './db';
 
 describe('local progress and backup',()=>{
+  it('preserves Interview Prep drafts, study and mock deadlines in account storage and backups', async () => {
+    const interview = { ...emptyInterview, drafts: { 'stock-corrections': { code: 'def solve(changes):\n    return 0', updatedAt: 123 } },
+      study: { session: { problemId: 'stock-corrections', ms: 2000 } }, mocks: { session: createMock('session', 123, 0) } };
+    const progress = { ...emptyProgress, settings: { ...emptyProgress.settings, interview } };
+    await saveProgress(progress, 'interview-user');
+    expect((await getProgress('interview-user')).settings.interview).toMatchObject(interview);
+    expect(parseBackup(JSON.stringify(makeBackup(progress))).settings.interview).toMatchObject(interview);
+    expect((await getProgress('another-user')).settings.interview).toBeUndefined();
+    expect(mergeProgress(emptyProgress, progress).settings.interview).toMatchObject(interview);
+  });
   beforeEach(async()=>{await new Promise<void>((resolve,reject)=>{const request=indexedDB.deleteDatabase('codebook');request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);request.onblocked=()=>reject(new Error('IndexedDB reset was blocked'));});await saveProgress(emptyProgress);});
   it('round trips progress through IndexedDB and normalizes old attempt counters',async()=>{
     await saveProgress({...emptyProgress,completedLessons:['arrays'],attempts:{'array-sum':{...emptyProgress.attempts['array-sum'],runs:3}}});

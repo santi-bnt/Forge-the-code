@@ -1,3 +1,5 @@
+import type { InterviewProgress } from './interview/progress';
+
 export type Language = 'python' | 'c' | 'cpp';
 export type TrackId = 'algorithms' | 'python' | 'c' | 'cpp' | 'embedded';
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -30,7 +32,7 @@ export type LearningTrack = { id: TrackId; title: string; description: string; a
 export type TestResult = { passed: boolean; expected: string; received: string; input: string; hidden?: boolean; error?: string };
 export type RunResult = { results: TestResult[]; stdout: string; error?: string; durationMs: number };
 export type AttemptStats = { runs: number; submits: number; failedSubmits: number; hintsUsed: number; solutionViewed: boolean; lastAttempt?: string; solvedAt?: string };
-export type Settings = { theme: 'dark' | 'light'; preferredLanguage: Language; updatedAt?: string };
+export type Settings = { theme: 'dark' | 'light'; preferredLanguage: Language; updatedAt?: string; interview?: InterviewProgress };
 export type Progress = {
   completedLessons: string[]; solvedExercises: string[]; attempts: Record<string, AttemptStats>;
   drafts: Record<string, string>; bookmarks: string[]; notes: Record<string, string>;

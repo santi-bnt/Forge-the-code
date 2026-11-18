@@ -1,5 +1,28 @@
 # Forge the Code
 
+## Interview Prep
+
+Abre **Interview Prep** en el menú principal o `/interview-prep` después de iniciar sesión con la autenticación Supabase existente. Para desarrollo: `npm install`, configura `.env.local` según la sección de cuentas y ejecuta `npm run dev`.
+
+- Dashboard con métricas reales, biblioteca de 20 problemas originales y filtros por tema, dificultad y texto. No son preguntas oficiales de TikTok ni contenido privado de assessments.
+- Plan de cuatro días, sin bloqueos: fundamentos; ventanas y búsqueda; estructuras y recorridos; simulacro y revisión.
+- Editor CodeMirror Python, tres pistas progresivas y solución bajo solicitud con complejidad, casos límite y optimizaciones revisados manualmente.
+- **Run Code** ejecuta los ejemplos visibles; **Submit** ejecuta también la validación. Solo un Submit con todos los casos correctos resuelve el problema. Las respuestas se comparan como valores JSON, respetando tipos y orden de listas.
+- Pyodide existente, cargado desde recursos locales, ejecuta Python real en un worker nuevo por ejecución. Incluye stdout, excepciones, tiempo de ejecución sin carga del runtime, cancelación manual y timeout de 15 segundos después del arranque. No se envía código a un servidor.
+- Simulacros de cuatro problemas y 70 minutos; borradores separados, navegación, finalización anticipada, resultados y revisión de errores. El plazo persiste al recargar o salir. Hay tres conjuntos rotativos; pueden contener problemas ya practicados. Es práctica inspirada en el formato general de CodeSignal, no una predicción del assessment de TikTok.
+- Progreso dentro de `settings.interview`: borradores, eventos de intentos, resultados, tiempo activo, simulacros y último problema. Reutiliza IndexedDB por cuenta, backups v2 y sincronización Supabase de `user_settings`, sin migración SQL nueva. La fusión deduplica eventos y selecciona cada borrador por su timestamp.
+- Los días 1–3 se completan al resolver sus problemas; el día 4, al finalizar y marcar revisado un simulacro. La tasa de éxito cuenta envíos correctos sobre envíos totales, no ejecuciones Run. El tiempo promedio usa tiempo con la ventana enfocada y visible por problema abierto, con checkpoints cada 20 segundos; un cierre abrupto puede perder el último intervalo.
+
+### Verificación
+
+Ejecuta `npm test`, `npm run lint` y `npm run build`. `src/interview/interview.test.ts` verifica todas las soluciones de referencia usando Pyodide real, comparación de respuestas, restauración de datos, métricas y plazos del simulacro. Los tests de almacenamiento comprueban IndexedDB, backups y fusión de progreso.
+
+Checklist manual: abre un problema, edita y ejecuta Run; envía una respuesta incorrecta y luego la solución; revisa stdout y errores; recarga y comprueba borrador/métricas; inicia un simulacro, cambia de problema, recarga, finaliza y revisa errores. Prueba también móvil y ambos temas.
+
+### Limitaciones de esta versión
+
+Los casos de validación se ocultan en la interfaz, pero están en los recursos locales; no existe protección antitrampa. El tiempo indicado corresponde al conjunto de casos, no a un benchmark por caso. No se infiere complejidad del código del usuario. La ejecución local no es un sandbox para código hostil: Pyodide puede acceder a capacidades del origen a través de sus APIs de navegador y no tiene una cuota fiable de memoria. Usa únicamente código propio o confiable. Quedan pendientes pruebas en dispositivos físicos y validación de sincronización contra una cuenta Supabase real; las pruebas automatizadas de fusión no sustituyen esa verificación.
+
 Forge the Code es una plataforma educativa local para aprender Algorithms, Python, C, C++ y Embedded Systems. Las lecciones, prácticas, notas y progreso viven en el dispositivo. No hay cuentas, backend ni servicios de IA.
 
 ## Estado de la fase 2
